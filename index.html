@@ -6,46 +6,11 @@
     <title>Education Board Result Portal</title>
     <!-- External Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PDF & QR Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-    <style>
-        :root { --primary-green: #006837; --bg-gray: #f2f2f2; }
-        body { background-color: var(--bg-gray); font-family: 'Segoe UI', Tahoma, sans-serif; }
-        
-        .main-wrapper { max-width: 950px; margin: 30px auto; background: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .header-bar { background: #f8f9fa; padding: 15px; border-bottom: 4px solid var(--primary-green); display: flex; align-items: center; }
-        
-        /* Form Styling */
-        .form-section { padding: 30px; }
-        .row-custom { display: flex; align-items: center; margin-bottom: 12px; }
-        .label-custom { width: 30%; font-weight: 600; color: #444; }
-        .input-custom { width: 70%; border-radius: 4px; border: 1px solid #aaa; padding: 5px 10px; }
-        .captcha-box { background: #eee; padding: 5px 15px; font-weight: bold; font-style: italic; letter-spacing: 5px; color: #555; user-select: none; border-radius: 4px; }
-        .btn-view { background: var(--primary-green); color: white; border: none; padding: 10px 40px; border-radius: 5px; font-weight: bold; }
-
-        /* Result & Certificate */
-        #result-area { display: none; padding: 20px; border-top: 1px dashed #ccc; }
-        .status-pass { color: green; font-weight: bold; }
-        .status-fail { color: red; font-weight: bold; }
-
-        /* Premium Certificate Design */
-        #cert-container { display: none; margin-top: 20px; }
-        #certificate-ui {
-            width: 850px; height: 600px; padding: 40px; background: #fff;
-            border: 25px solid var(--primary-green); outline: 8px solid #c5a059; outline-offset: -18px;
-            margin: auto; position: relative; color: #333; text-align: center;
-        }
-        .cert-header { font-size: 45px; font-family: 'Garamond', serif; color: var(--primary-green); text-transform: uppercase; font-weight: bold; }
-        .cert-body { text-align: left; margin: 40px 60px; font-size: 19px; line-height: 1.8; }
-        .cert-field { font-weight: bold; color: #000; border-bottom: 1px solid #888; padding: 0 5px; }
-        
-        .cert-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding: 0 60px; }
-        #qrcode-box { border: 2px solid #333; padding: 5px; background: #fff; }
-        .sign-area { text-align: center; width: 220px; border-top: 2px solid #333; font-weight: bold; padding-top: 5px; }
-        
-        @media (max-width: 768px) { .row-custom { flex-direction: column; align-items: flex-start; } .label-custom, .input-custom { width: 100%; } }
-    </style>
 </head>
 <body>
 
@@ -53,7 +18,7 @@
     <div class="header-bar">
         <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg" width="65" alt="Logo">
         <div class="ms-3">
-            <h4 class="m-0" style="color:var(--primary-green)">Intermediate and Secondary Education Boards Bangladesh</h4>
+            <h4 class="m-0 text-success">Intermediate and Secondary Education Boards Bangladesh</h4>
         </div>
     </div>
 
@@ -83,7 +48,6 @@
         </div>
     </div>
 
-    <!-- Marksheet Section -->
     <div id="result-area">
         <h5 class="text-center mb-3">Academic Marksheet - <span id="res-name"></span></h5>
         <table class="table table-bordered text-center">
@@ -97,12 +61,10 @@
         </div>
     </div>
 
-    <!-- Certificate Section -->
     <div id="cert-container">
         <div id="certificate-ui">
             <div class="cert-header">Certificate of Achievement</div>
             <p><i>Intermediate and Secondary Education Board</i></p>
-            
             <div class="cert-body">
                 This is to certify that <span class="cert-field" id="st-name">...</span> <br>
                 Class: <span class="cert-field" id="st-class">...</span> | Roll: <span class="cert-field" id="st-roll">...</span> <br>
@@ -110,7 +72,6 @@
                 Successfully completed the examination in <span class="cert-field" id="st-year">...</span> <br>
                 Result: <span class="cert-field" id="st-res">GPA 5.00</span>
             </div>
-
             <div class="cert-footer">
                 <div id="qrcode-box"></div>
                 <div class="sign-area">Chairman / Principal</div>
@@ -122,79 +83,6 @@
     </div>
 </div>
 
-<script>
-    // ডামি স্টুডেন্ট ডেটা
-    const students = [
-        {
-            roll: "101", reg: "202601", name: "KHAIRUL ISLAM", class: "HSC", year: "2026", res: "GPA 5.00", pass: true,
-            marks: [{s: "Bangla", m: 85, g: "A+"}, {s: "English", m: 92, g: "A+"}, {s: "ICT", m: 88, g: "A+"}]
-        },
-        {
-            roll: "102", reg: "202602", name: "RAHIM UDDIN", class: "HSC", year: "2026", res: "Failed", pass: false,
-            marks: [{s: "Bangla", m: 28, g: "F"}, {s: "English", m: 45, g: "C"}]
-        }
-    ];
-
-    function checkResult() {
-        const rollVal = document.getElementById('roll').value;
-        const captcha = document.getElementById('captcha-input').value;
-
-        // সিম্পল ভ্যালিডেশন
-        if(captcha != "13") { alert("Wrong Captcha!"); return; }
-
-        const student = students.find(s => s.roll === rollVal);
-
-        if(student) {
-            document.getElementById('result-area').style.display = 'block';
-            document.getElementById('res-name').innerText = student.name;
-            
-            let html = "";
-            student.marks.forEach(item => {
-                html += `<tr><td>${item.s}</td><td>${item.m}</td><td>${item.g}</td><td class="${item.m >= 33 ? 'status-pass':'status-fail'}">${item.m >= 33 ? 'Pass':'Fail'}</td></tr>`;
-            });
-            document.getElementById('marksheet-body').innerHTML = html;
-
-            // যদি স্টুডেন্ট পাস করে তবেই সার্টিফিকেট বাটন দেখাবে
-            if(student.pass) {
-                document.getElementById('cert-btn').classList.remove('d-none');
-                // ডেটা সেট ফর সার্টিফিকেট
-                document.getElementById('st-name').innerText = student.name;
-                document.getElementById('st-class').innerText = student.class;
-                document.getElementById('st-roll').innerText = student.roll;
-                document.getElementById('st-reg').innerText = student.reg;
-                document.getElementById('st-year').innerText = student.year;
-                document.getElementById('st-res').innerText = student.res;
-            } else {
-                document.getElementById('cert-btn').classList.add('d-none');
-                document.getElementById('cert-container').style.display = 'none';
-            }
-        } else {
-            alert("Student not found!");
-        }
-    }
-
-    function openCertificate() {
-        document.getElementById('cert-container').style.display = 'block';
-        
-        // QR Code জেনারেট
-        const qrDiv = document.getElementById("qrcode-box");
-        qrDiv.innerHTML = "";
-        const verifyData = "Student: " + document.getElementById('st-name').innerText + " | Result: Verified";
-        new QRCode(qrDiv, { text: verifyData, width: 85, height: 85 });
-        
-        window.scrollTo(0, document.body.scrollHeight);
-    }
-
-    function downloadPDF() {
-        const element = document.getElementById('certificate-ui');
-        html2pdf().from(element).set({
-            margin: 0,
-            filename: 'Official_Certificate.pdf',
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-        }).save();
-    }
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
