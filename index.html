@@ -3,167 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Portal with QR Code</title>
+    <title>Education Board Result Portal</title>
+    <!-- External Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
+
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .main-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-top: 30px; }
+        :root { --primary-green: #006837; --bg-gray: #f2f2f2; }
+        body { background-color: var(--bg-gray); font-family: 'Segoe UI', Tahoma, sans-serif; }
         
-        /* Marksheet Styling */
+        .main-wrapper { max-width: 950px; margin: 30px auto; background: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header-bar { background: #f8f9fa; padding: 15px; border-bottom: 4px solid var(--primary-green); display: flex; align-items: center; }
+        
+        /* Form Styling */
+        .form-section { padding: 30px; }
+        .row-custom { display: flex; align-items: center; margin-bottom: 12px; }
+        .label-custom { width: 30%; font-weight: 600; color: #444; }
+        .input-custom { width: 70%; border-radius: 4px; border: 1px solid #aaa; padding: 5px 10px; }
+        .captcha-box { background: #eee; padding: 5px 15px; font-weight: bold; font-style: italic; letter-spacing: 5px; color: #555; user-select: none; border-radius: 4px; }
+        .btn-view { background: var(--primary-green); color: white; border: none; padding: 10px 40px; border-radius: 5px; font-weight: bold; }
+
+        /* Result & Certificate */
+        #result-area { display: none; padding: 20px; border-top: 1px dashed #ccc; }
         .status-pass { color: green; font-weight: bold; }
         .status-fail { color: red; font-weight: bold; }
-        .hidden { display: none; }
 
-        /* Certificate Styling - Original Design with QR */
-        #certificate-pdf {
-            width: 850px; height: 600px; padding: 50px; background: #fff;
-            border: 20px double #1a237e; position: relative; margin: auto;
-            color: #333; text-align: center; box-sizing: border-box;
+        /* Premium Certificate Design */
+        #cert-container { display: none; margin-top: 20px; }
+        #certificate-ui {
+            width: 850px; height: 600px; padding: 40px; background: #fff;
+            border: 25px solid var(--primary-green); outline: 8px solid #c5a059; outline-offset: -18px;
+            margin: auto; position: relative; color: #333; text-align: center;
         }
-        .cert-header { color: #1a237e; font-size: 38px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .cert-sub { font-size: 18px; font-style: italic; color: #555; margin-bottom: 30px; }
-        .cert-body { font-size: 18px; line-height: 1.8; text-align: left; margin: 0 40px; }
-        .cert-name { font-family: 'Georgia', serif; font-size: 28px; font-weight: bold; border-bottom: 1px solid #333; display: inline-block; padding: 0 10px; }
+        .cert-header { font-size: 45px; font-family: 'Garamond', serif; color: var(--primary-green); text-transform: uppercase; font-weight: bold; }
+        .cert-body { text-align: left; margin: 40px 60px; font-size: 19px; line-height: 1.8; }
+        .cert-field { font-weight: bold; color: #000; border-bottom: 1px solid #888; padding: 0 5px; }
         
-        /* Footer: QR Code and Signature */
-        .cert-footer {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 40px;
-        }
-        #qrcode { background: #fff; padding: 5px; border: 1px solid #ddd; }
-        .signature { border-top: 2px solid #333; width: 200px; text-align: center; font-weight: bold; padding-top: 5px; }
+        .cert-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding: 0 60px; }
+        #qrcode-box { border: 2px solid #333; padding: 5px; background: #fff; }
+        .sign-area { text-align: center; width: 220px; border-top: 2px solid #333; font-weight: bold; padding-top: 5px; }
+        
+        @media (max-width: 768px) { .row-custom { flex-direction: column; align-items: flex-start; } .label-custom, .input-custom { width: 100%; } }
     </style>
 </head>
 <body>
 
-<div class="container pb-5">
-    <div class="main-card">
-        <h2 class="text-center text-primary mb-4">Academic Portal</h2>
-        
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label>Roll Number</label>
-                <input type="text" id="rollNo" class="form-control" placeholder="Enter Roll (e.g. 101)">
+<div class="main-wrapper">
+    <div class="header-bar">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Government_Seal_of_Bangladesh.svg" width="65" alt="Logo">
+        <div class="ms-3">
+            <h4 class="m-0" style="color:var(--primary-green)">Intermediate and Secondary Education Boards Bangladesh</h4>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <div class="row-custom">
+            <div class="label-custom">Examination</div>
+            <select id="exam" class="input-custom form-select"><option>HSC/Alim/Equivalent</option><option>SSC/Dakhil</option></select>
+        </div>
+        <div class="row-custom">
+            <div class="label-custom">Year</div>
+            <select id="year" class="input-custom form-select"><option>2026</option><option>2025</option></select>
+        </div>
+        <div class="row-custom">
+            <div class="label-custom">Roll Number</div>
+            <input type="text" id="roll" class="input-custom" placeholder="Enter Roll">
+        </div>
+        <div class="row-custom">
+            <div class="label-custom">Registration No</div>
+            <input type="text" id="reg" class="input-custom" placeholder="Enter Registration">
+        </div>
+        <div class="row-custom">
+            <div class="label-custom">CAPTCHA (8+5)</div>
+            <input type="text" id="captcha-input" class="input-custom" placeholder="Sum of numbers">
+        </div>
+        <div class="text-center mt-4">
+            <button onclick="checkResult()" class="btn-view">View Result</button>
+        </div>
+    </div>
+
+    <!-- Marksheet Section -->
+    <div id="result-area">
+        <h5 class="text-center mb-3">Academic Marksheet - <span id="res-name"></span></h5>
+        <table class="table table-bordered text-center">
+            <thead class="table-light">
+                <tr><th>Subject</th><th>Marks</th><th>Grade</th><th>Status</th></tr>
+            </thead>
+            <tbody id="marksheet-body"></tbody>
+        </table>
+        <div class="text-center mt-3">
+            <button id="cert-btn" onclick="openCertificate()" class="btn btn-success d-none">Download Certificate</button>
+        </div>
+    </div>
+
+    <!-- Certificate Section -->
+    <div id="cert-container">
+        <div id="certificate-ui">
+            <div class="cert-header">Certificate of Achievement</div>
+            <p><i>Intermediate and Secondary Education Board</i></p>
+            
+            <div class="cert-body">
+                This is to certify that <span class="cert-field" id="st-name">...</span> <br>
+                Class: <span class="cert-field" id="st-class">...</span> | Roll: <span class="cert-field" id="st-roll">...</span> <br>
+                Registration No: <span class="cert-field" id="st-reg">...</span> <br>
+                Successfully completed the examination in <span class="cert-field" id="st-year">...</span> <br>
+                Result: <span class="cert-field" id="st-res">GPA 5.00</span>
             </div>
-            <div class="col-md-6 d-flex align-items-end">
-                <button onclick="searchResult()" class="btn btn-primary w-100">Search Result</button>
+
+            <div class="cert-footer">
+                <div id="qrcode-box"></div>
+                <div class="sign-area">Chairman / Principal</div>
             </div>
         </div>
-
-        <div id="resultSection" class="mt-5 hidden">
-            <h4 class="text-center">Student Marksheet</h4>
-            <div id="stDetails" class="mb-3"></div>
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr><th>Subject</th><th>Marks</th><th>Grade</th><th>Status</th></tr>
-                </thead>
-                <tbody id="marksTable"></tbody>
-            </table>
-            <div class="text-end">
-                <button id="certBtn" onclick="generateAndShowCert()" class="btn btn-success hidden">Generate Certificate</button>
-            </div>
-        </div>
-
-        <div id="certSection" class="mt-5 hidden">
-            <div id="certificate-pdf">
-                <div class="cert-header" id="instName">INSTITUTION NAME</div>
-                <div class="cert-sub">Certificate of Achievement</div>
-                
-                <div class="cert-body">
-                    This is to certify that <span class="cert-name" id="cName">...</span> <br>
-                    Son/Daughter of <b id="cFather">...</b> and <b id="cMother">...</b> <br>
-                    Roll No: <b id="cRoll">...</b>, Date of Birth: <b id="cDOB">...</b> <br>
-                    has successfully passed the <b id="cExam">...</b> in <b id="cYear">...</b> 
-                    with Result: <b id="cResult">...</b>.
-                </div>
-
-                <div class="cert-footer">
-                    <div id="qrcode"></div> <div class="signature">Headmaster Signature</div>
-                </div>
-            </div>
-            <div class="text-center mt-3">
-                <button onclick="downloadPDF()" class="btn btn-dark">Download PDF</button>
-            </div>
+        <div class="text-center my-4">
+            <button onclick="downloadPDF()" class="btn btn-dark">Export to PDF</button>
         </div>
     </div>
 </div>
 
 <script>
+    // ডামি স্টুডেন্ট ডেটা
     const students = [
         {
-            roll: "101", name: "Md. Khairul Sheikh", father: "Abdul Sheikh", mother: "Khatun Begum",
-            dob: "12-05-2008", inst: "Faridpur High School", exam: "Annual Exam", year: "2026",
-            result: "GPA 5.00", status: "Pass",
-            subjects: [
-                {s: "English", m: 85, g: "A+"},
-                {s: "Mathematics", m: 92, g: "A+"}
-            ]
+            roll: "101", reg: "202601", name: "KHAIRUL ISLAM", class: "HSC", year: "2026", res: "GPA 5.00", pass: true,
+            marks: [{s: "Bangla", m: 85, g: "A+"}, {s: "English", m: 92, g: "A+"}, {s: "ICT", m: 88, g: "A+"}]
+        },
+        {
+            roll: "102", reg: "202602", name: "RAHIM UDDIN", class: "HSC", year: "2026", res: "Failed", pass: false,
+            marks: [{s: "Bangla", m: 28, g: "F"}, {s: "English", m: 45, g: "C"}]
         }
     ];
 
-    let activeStudent = null;
+    function checkResult() {
+        const rollVal = document.getElementById('roll').value;
+        const captcha = document.getElementById('captcha-input').value;
 
-    function searchResult() {
-        const roll = document.getElementById('rollNo').value;
-        activeStudent = students.find(s => s.roll === roll);
-        
-        if (activeStudent) {
-            document.getElementById('resultSection').classList.remove('hidden');
-            document.getElementById('stDetails').innerHTML = `<b>Student Name:</b> ${activeStudent.name}`;
+        // সিম্পল ভ্যালিডেশন
+        if(captcha != "13") { alert("Wrong Captcha!"); return; }
+
+        const student = students.find(s => s.roll === rollVal);
+
+        if(student) {
+            document.getElementById('result-area').style.display = 'block';
+            document.getElementById('res-name').innerText = student.name;
             
             let html = "";
-            activeStudent.subjects.forEach(item => {
-                html += `<tr><td>${item.s}</td><td>${item.m}</td><td>${item.g}</td><td class="status-pass">Pass</td></tr>`;
+            student.marks.forEach(item => {
+                html += `<tr><td>${item.s}</td><td>${item.m}</td><td>${item.g}</td><td class="${item.m >= 33 ? 'status-pass':'status-fail'}">${item.m >= 33 ? 'Pass':'Fail'}</td></tr>`;
             });
-            document.getElementById('marksTable').innerHTML = html;
+            document.getElementById('marksheet-body').innerHTML = html;
 
-            if (activeStudent.status === "Pass") {
-                document.getElementById('certBtn').classList.remove('hidden');
+            // যদি স্টুডেন্ট পাস করে তবেই সার্টিফিকেট বাটন দেখাবে
+            if(student.pass) {
+                document.getElementById('cert-btn').classList.remove('d-none');
+                // ডেটা সেট ফর সার্টিফিকেট
+                document.getElementById('st-name').innerText = student.name;
+                document.getElementById('st-class').innerText = student.class;
+                document.getElementById('st-roll').innerText = student.roll;
+                document.getElementById('st-reg').innerText = student.reg;
+                document.getElementById('st-year').innerText = student.year;
+                document.getElementById('st-res').innerText = student.res;
+            } else {
+                document.getElementById('cert-btn').classList.add('d-none');
+                document.getElementById('cert-container').style.display = 'none';
             }
         } else {
-            alert("Record not found!");
+            alert("Student not found!");
         }
     }
 
-    function generateAndShowCert() {
-        document.getElementById('certSection').classList.remove('hidden');
+    function openCertificate() {
+        document.getElementById('cert-container').style.display = 'block';
         
-        // Fill Data
-        document.getElementById('instName').innerText = activeStudent.inst;
-        document.getElementById('cName').innerText = activeStudent.name;
-        document.getElementById('cFather').innerText = activeStudent.father;
-        document.getElementById('cMother').innerText = activeStudent.mother;
-        document.getElementById('cRoll').innerText = activeStudent.roll;
-        document.getElementById('cDOB').innerText = activeStudent.dob;
-        document.getElementById('cExam').innerText = activeStudent.exam;
-        document.getElementById('cYear').innerText = activeStudent.year;
-        document.getElementById('cResult').innerText = activeStudent.result;
-
-        // Generate QR Code
-        const qrDiv = document.getElementById("qrcode");
-        qrDiv.innerHTML = ""; // Clear existing
-        const verifyLink = window.location.href + "?verify=" + activeStudent.roll;
+        // QR Code জেনারেট
+        const qrDiv = document.getElementById("qrcode-box");
+        qrDiv.innerHTML = "";
+        const verifyData = "Student: " + document.getElementById('st-name').innerText + " | Result: Verified";
+        new QRCode(qrDiv, { text: verifyData, width: 85, height: 85 });
         
-        new QRCode(qrDiv, {
-            text: verifyLink,
-            width: 80,
-            height: 80
-        });
-
         window.scrollTo(0, document.body.scrollHeight);
     }
 
     function downloadPDF() {
-        const element = document.getElementById('certificate-pdf');
+        const element = document.getElementById('certificate-ui');
         html2pdf().from(element).set({
             margin: 0,
-            filename: 'Certificate.pdf',
+            filename: 'Official_Certificate.pdf',
+            html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
         }).save();
     }
