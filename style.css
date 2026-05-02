@@ -1,0 +1,132 @@
+:root {
+    --primary-green: #006837;
+    --bg-gray: #f2f2f2;
+}
+
+body {
+    background-color: var(--bg-gray);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.main-wrapper {
+    max-width: 950px;
+    margin: 30px auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.header-bar {
+    background: #f8f9fa;
+    padding: 15px;
+    border-bottom: 4px solid var(--primary-green);
+    display: flex;
+    align-items: center;
+}
+
+.form-section {
+    padding: 30px;
+}
+
+.row-custom {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.label-custom {
+    width: 30%;
+    font-weight: 600;
+    color: #444;
+}
+
+.input-custom {
+    width: 70%;
+    border-radius: 4px;
+    border: 1px solid #aaa;
+    padding: 5px 10px;
+}
+
+.btn-view {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 10px 40px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#result-area {
+    display: none;
+    padding: 20px;
+    border-top: 1px dashed #ccc;
+}
+
+.status-pass { color: green; font-weight: bold; }
+.status-fail { color: red; font-weight: bold; }
+
+/* Certificate Styles */
+#cert-container {
+    display: none;
+    margin-top: 20px;
+}
+
+#certificate-ui {
+    width: 850px;
+    height: 600px;
+    padding: 40px;
+    background: #fff;
+    border: 25px solid var(--primary-green);
+    outline: 8px solid #c5a059;
+    outline-offset: -18px;
+    margin: auto;
+    position: relative;
+    color: #333;
+    text-align: center;
+}
+
+.cert-header {
+    font-size: 45px;
+    font-family: 'Garamond', serif;
+    color: var(--primary-green);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.cert-body {
+    text-align: left;
+    margin: 40px 60px;
+    font-size: 19px;
+    line-height: 1.8;
+}
+
+.cert-field {
+    font-weight: bold;
+    color: #000;
+    border-bottom: 1px solid #888;
+    padding: 0 5px;
+}
+
+.cert-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 40px;
+    padding: 0 60px;
+}
+
+#qrcode-box {
+    border: 2px solid #333;
+    padding: 5px;
+    background: #fff;
+}
+
+.sign-area {
+    text-align: center;
+    width: 220px;
+    border-top: 2px solid #333;
+    font-weight: bold;
+    padding-top: 5px;
+}
